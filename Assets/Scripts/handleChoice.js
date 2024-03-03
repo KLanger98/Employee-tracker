@@ -1,17 +1,14 @@
-const mysql = require('mysql2');
+
 const inquirer = require('inquirer');
 
-const deleteFrom = require('./queries/delete')
+const viewTable = require('./queries/viewTable')
 
-const db = mysql.createConnection(
-  {
-    host: 'localhost',
-    user: 'root',
-    password: 'karl170798',
-    database: 'employee_management_system_db'
-  },
-  console.log(`Connected to the employee_management_system_db database.`)
-);
+const {searchExisting, insertNew, updateValue, deleteRow} = require('./queries/databaseCRUD')
+const {addDepartment, addEmployee, addRole} = require('./queries/addRow');
+const {updateEmployee} = require('./queries/updateRow');
+const deleteFrom = require('./queries/deleteRow')
+
+const db = require('./database');
 
 function handleChoice(option){
     switch(option){
@@ -20,7 +17,7 @@ function handleChoice(option){
         case "addEmployee":
             return addEmployee();
         case "updateEmployeeRole":
-            return updateEmployeeRole();
+            return updateEmployee("role");
         case "viewRoles":
             return viewTable("role")
         case "addRole":
@@ -30,7 +27,7 @@ function handleChoice(option){
         case "addDep":
             return addDepartment();
         case "updateEmployeeMan":
-            return viewEmployeeManager();
+            return updateEmployee("manager_id");
         case "viewEmployeeByMan":
             return employeeByManager();
         case "viewEmployeeByDep":
@@ -44,179 +41,19 @@ function handleChoice(option){
     }
 }
 
-function viewTable(tableName){
-    return new Promise((resolve, reject) => {
-        db.query(`SELECT * FROM ${tableName}`, function (err, rows, results) {
-            if(err){
-                reject(err);
-            } else{
-                console.table(rows);
-                resolve(results);
-            }   
-        });
-    });
-};
-
-
-function addDepartment(){
-    return new Promise((resolve, reject) => {
-        let questions = [
-                {
-                    message: "What is the Department name?",
-                    name: "department",
-                    type: "input"
-                }
-            ];
-        inquirer
-            .prompt(questions)
-            .then((response) => {
-                resolve(insertNew("department", "(name)", [response.department]))
-            })
-            .catch((error) => {
-                    reject(error);
-            });
-    }); 
-}
 
 
 
-function addRole(){
-    return new Promise ((resolve, reject) => {
-        searchExisting("*", "department")
-        .then((response) => {
-            
-            let departments = formatDepartments(response);
-
-            let associatedQuestions = [
-                {
-                    message: "What is the title of the new Role?",
-                    type: "input",
-                    name:"role"
-                },
-                {
-                    message: "What is the salary for this new Role?",
-                    type: "number",
-                    name: "salary"
-                },
-                {
-                    message: "Select a department for this role",
-                    type: "list",
-                    name: "department",
-                    choices: departments
-                }
-            ]
-            inquirer
-                .prompt(associatedQuestions)
-                .then((response) => {
-                    resolve(insertNew("role", "(title, salary, department_id)", [response.role, response.salary, response.department]))
-                    
-                    
-                })
-                .catch((err) => {
-                    console.error(err)
-                    reject(err)
-                })
-        })
-        .catch((err) =>{
-            console.error(err)
-            reject(err)
-        })
-    })
-    
-}
-
-function addEmployee(){
-    return new Promise ((resolve, reject) => {
-        searchExisting("title, id", "role")
-        .then((response) => {
-            let roles = formatRoles(response)
-            searchExisting("first_name, last_name, id", "employee")
-            .then((response) => {
-                let employees = formatEmployees(response);
-                let associatedQuestions = [
-                {
-                    message: "What is the employee's first name?",
-                    type: "input",
-                    name:"firstName"
-                },
-                {
-                    message: "What is the employee's last name?",
-                    type: "input",
-                    name: "lastName"
-                },
-                {
-                    message: "Select a role for this employee",
-                    type: "list",
-                    name: "role",
-                    choices: roles
-                },
-                {
-                    message: "Who is this Employee's manager",
-                    type: "list",
-                    name: "manager",
-                    choices: employees
-                }
-            ]
-            inquirer
-                .prompt(associatedQuestions)
-                .then((response) => {
-                    resolve(insertNew("employee", "(first_name, last_name, role_id, manager_id)", [response.firstName, response.lastName, response.role, response.manager]))
-                })
-                .catch((err) => {
-                    console.error(err)
-                    reject(err)
-                })
-            })
-        })
-        .catch((err) =>{
-            console.error(err)
-            reject(err)
-        })
-    })
-}
-
-function insertNew(tableName, columns, values){
-    let placeholder = "(?)"
-    if(values.length == 2){
-        placeholder = "(?, ?)"
-    } else if(values.length == 3){
-        placeholder = "(?, ?, ?)"
-    } else if (values.length == 4){
-        placeholder = "(?, ?, ?, ?)"
-    }
-
-    return new Promise((resolve, reject) => {
-        db.query(`INSERT INTO ${tableName} ${columns} VALUES ${placeholder}`, values, function(err, results) {
-            if(err){
-                reject(err);
-            } else{
-                resolve(results);
-            } 
-        });
-    })
-}
-
-function searchExisting(term, tableName){
-    return new Promise((resolve, reject) => {
-        db.query(`SELECT ${term} FROM ${tableName}`, function(err, results){
-            if(err){
-                reject(err);
-            } else{
-                resolve(results);
-            } 
-    });
-    })
-}
 
 function employeeByManager(){
     return new Promise((resolve, reject) =>{
-        searchExisting("first_name, last_name, id, manager_id")
+        searchExisting("first_name, last_name, id", "employee")
             .then((response) => {
                 let employees = formatEmployees(response);
 
                 let question = [
                     {
-                        message: "Select an employee",
+                        message: "Select a manager",
                         name: "managerID",
                         type: "list",
                         choices: employees
@@ -244,87 +81,14 @@ function employeeByManager(){
     })
 }
 
-function formatDepartments(response){
-    return response.map(obj => {
-        let newObj = {...obj};
-        newObj.value = newObj.id;
-        delete newObj.id;
-        return newObj;
-    })
-}
-
-function formatEmployees(response){
-    return response.map(obj =>{
-            let newObj = {
-                name: obj.first_name + " " + obj.last_name,
-                value: obj.id
-            }
-            return newObj;
-        })
-}
-
-function formatRoles(response){
-    return response.map(obj => {
-        let newObj = {...obj};
-        newObj.name = newObj.title;
-        newObj.value = newObj.id;
-        delete newObj.id;
-        return newObj;
-    })
-}
 
 
-function deleteFrom(searchTerm, tableName){
-    return new Promise ((resolve, reject) => {
-        searchExisting(searchTerm, tableName)
-        .then((response) => {
-            let formattedObj
-            
-            if(tableName == "department"){
-                formattedObj = formatDepartments(response);
-            } else if(tableName == "role"){
-                formattedObj = formatRoles(response);
-            } else if(tableName == "employee"){
-                formattedObj = formatEmployees(response);
-            };
 
-            let associatedQuestions = [
-                {
-                    message: `Select ${tableName} to delete`,
-                    type: "list",
-                    name: "toDeleteID",
-                    choices: formattedObj
-                }
-            ]
-            inquirer
-                .prompt(associatedQuestions)
-                .then((response) => {
-                    resolve(deleteRow(tableName, response.toDeleteID))
-                })
-                .catch((err) => {
-                    console.error(err)
-                    reject(err)
-                })
-        })
-        .catch((err) =>{
-            console.error(err)
-            reject(err)
-        })
-    })
-    
-}
 
-function deleteRow(tableName, value){
-    return new Promise((resolve, reject) => {
-        db.query(`DELETE FROM ${tableName} WHERE id = ?`, [value], function(err, results){
-            if(err){
-                reject(err);
-            } else{
-                resolve(results);
-            } 
-    });
-    })
-}
+
+
+
+
 
 
 module.exports = handleChoice;

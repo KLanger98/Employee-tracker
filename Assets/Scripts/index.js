@@ -1,5 +1,6 @@
 const promptUser = require('./promptChoice');
-const handleChoice = require('./handleChoice')
+const handleChoice = require('./handleChoice');
+
 
 function runEmployeeDatabase(){
     promptUser()
