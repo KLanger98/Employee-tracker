@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/KLanger98/Employee-tracker#readme",
   "dependencies": {
-    "inquirer": "^9.2.15"
+    "express": "^4.18.3",
+    "inquirer": "^8.2.4",
+    "mysql2": "^3.9.2"
   }
 }
