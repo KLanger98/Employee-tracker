@@ -7,11 +7,13 @@ Completing this project was a useful lesson in maintaining a SQL database by dyn
 
 
 ## Installation
-To install this Employee Management System, simply clone this repository to your local computer .
+To install this Employee Management System, simply clone this repository to your local computer.
 
 Once installed you will need to navigate to the repository and install all necessary node packages with 'npm i'. This will install inquirer and mysql2 for use. 
 
-You will need to have SQL downloaded and installed on your computer for this application to run. You will then need to ensure that your SQL password in database.js found at 'Assets/Scripts/database.js' matches your own password.
+You will need to have SQL downloaded and installed on your computer for this application to run. You will then need to ensure that your SQL credentials in database.js found at 'Assets/Scripts/database.js' matches your own credentials.
+
+You will then need to launch SQL and SOURCE schema.sql and seeds.sql.
 
 Then, run the program by entering 'npm start' into the terminal
 
