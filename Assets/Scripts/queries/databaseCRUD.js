@@ -1,8 +1,6 @@
 const db = require('../database');
 
 
-
-
 //CREATE new row inside table
 function insertNew(tableName, columns, values){
     let placeholder = "(?)"
@@ -19,6 +17,7 @@ function insertNew(tableName, columns, values){
             if(err){
                 reject(err);
             } else{
+                console.log(`Successfuly inserted new row in ${tableName} table!`)
                 resolve(results);
             } 
         });
@@ -38,13 +37,28 @@ function searchExisting(term, tableName){
     })
 };
 
-//UPDATE value from row in table
-function updateValue(tableName, columnName, value, id){
+//READ Table
+function viewTable(sql){
     return new Promise((resolve, reject) => {
-        db.query(`UPDATE ${tableName} SET ${columnName} = ${value} WHERE id = ${id}`, function(err, results){
+        db.query(sql, function (err, rows, results) {
             if(err){
                 reject(err);
             } else{
+                console.table(rows);
+                resolve(results);
+            }   
+        });
+    });
+};
+
+//UPDATE value from row in table
+function updateValue(tableName, columnName, value, id){
+    return new Promise((resolve, reject) => {
+        db.query(`UPDATE ${tableName} SET ${columnName} = ${value} WHERE id = ?`, id, function(err, results){
+            if(err){
+                reject(err);
+            } else{
+                console.log(`Successfully updated row in ${tableName} table!`)
                 resolve(results);
             } 
     });
@@ -58,10 +72,11 @@ function deleteRow(tableName, value){
             if(err){
                 reject(err);
             } else{
+                console.log(`Successfully deleted row in ${tableName} table!`);
                 resolve(results);
             } 
     });
     })
 }
 
-module.exports = {searchExisting, insertNew, updateValue, deleteRow}
+module.exports = {searchExisting, insertNew, updateValue, deleteRow, viewTable}

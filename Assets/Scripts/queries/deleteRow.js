@@ -1,21 +1,13 @@
 const inquirer = require('inquirer');
 const {deleteRow, searchExisting} = require('./databaseCRUD');
-const {formatDepartments, formatEmployees, formatRoles} = require('./formatQuery');
+const formatResponse = require('./formatQuery');
 
-
+//Delete selected row from selected table
 function deleteFrom(searchTerm, tableName){
     return new Promise ((resolve, reject) => {
         searchExisting(searchTerm, tableName)
         .then((response) => {
-            let formattedObj
-            
-            if(tableName == "department"){
-                formattedObj = formatDepartments(response);
-            } else if(tableName == "role"){
-                formattedObj = formatRoles(response);
-            } else if(tableName == "employee"){
-                formattedObj = formatEmployees(response);
-            };
+            let formattedObj = formatResponse(response, tableName)
 
             let associatedQuestions = [
                 {

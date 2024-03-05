@@ -1,6 +1,6 @@
 const express = require('express');
 const runEmployeeDatabase = require('./Assets/Scripts/index');
-const logTitle = require('./Assets/Scripts/logTitle')
+const logTitle = require('./Assets/Scripts/logTitle');
 
 
 const PORT = process.env.port || 3001;
@@ -10,12 +10,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 
-
 app.use((req, res) => {
   res.status(404).end();
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     `Server running on ${PORT}`
 });
 

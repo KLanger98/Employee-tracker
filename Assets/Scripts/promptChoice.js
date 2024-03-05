@@ -9,9 +9,9 @@ const options = [
     {name: "View All Departments", value: "viewDepartments"},
     {name: "Add Department", value: "addDep"},
     {name: "Update Employee Role", value: "updateEmployeeRole"},
-    {name: "Update employee manager", value: "updateEmployeeMan"},
-    {name: "View employees by manager", value: "viewEmployeesByMan"},
-    {name: "View Employees by department", value: "viewEmployeesByDep"},
+    {name: "Update Employee Manager", value: "updateEmployeeMan"},
+    {name: "View Employees by Manager", value: "viewEmployeesByMan"},
+    {name: "View Employees by Department", value: "viewEmployeesByDep"},
     {name: "Delete Department", value: "deleteDepartment"},
     {name: "Delete Roles", value: "deleteRoles"},
     {name: "Delete Employees", value: "deleteEmployee"},
@@ -23,7 +23,7 @@ let optionsQuesiton = [
     {
         type: 'list',
         name: 'command',
-        message: "What would you like to do?",
+        message: "What Would You Like To Do?",
         choices: options
     }
 ];

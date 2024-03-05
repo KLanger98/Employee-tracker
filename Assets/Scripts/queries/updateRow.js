@@ -1,13 +1,16 @@
 const inquirer = require('inquirer');
 const {updateValue, searchExisting} = require('./databaseCRUD');
-const {formatDepartments, formatEmployees, formatRoles} = require('./formatQuery');
+const formatResponse = require('./formatQuery');
 
+
+//Update an employee
 function updateEmployee(column){
     return new Promise((resolve, reject) =>{
         searchExisting("first_name, last_name, id", "employee")
             .then((response) => {
-                let employees = formatEmployees(response);
+                let employees = formatResponse(response, "employee");
 
+                //Update only role
                 if(column == "role"){
                     updateRole(employees)
                     .then((result) => {
@@ -16,18 +19,18 @@ function updateEmployee(column){
                     .catch((err) => {
                         reject(err);
                     });
-                    return;
                 }
 
+                //Continue to update manager
                 let question = [
                     {
-                        message: "Select an employee",
+                        message: "Select an Employee",
                         name: "employeeID",
                         type: "list",
                         choices: employees
                     },
                     {
-                        message: "Select a manager",
+                        message: "Select a Manager",
                         name: "managerID",
                         type: "list",
                         choices: employees
@@ -49,11 +52,12 @@ function updateEmployee(column){
     })
 }
 
+//Update employee role
 function updateRole(employees){
     return new Promise((resolve, reject) => {
         searchExisting("title, id", "role")
         .then((response) => {
-            let roles = formatRoles(response);
+            let roles = formatResponse(response, "role");
 
             let question = [
                 {
